@@ -17,7 +17,7 @@ def get_json():
     print(descriptions)
     for div in link_divs:
         links.append((div.find("a")['href'])[7:-91])
-    for title, desc, link in zip(titles, descriptions, links):
+    for title, desc, link in zip(titles, descriptions[::2], links[::2]):
         desc = desc.text.split("·")
         result[counter] = {"title": title.text, "desc": desc[1].strip(), "link": link, "time": desc[0].strip()}
         counter += 1
