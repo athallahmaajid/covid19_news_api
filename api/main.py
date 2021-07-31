@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 import requests
 from bs4 import BeautifulSoup
+import uvicorn
 
 app = FastAPI()
 
@@ -33,3 +34,6 @@ def get_api():
 @app.get('/api/news/{id}')
 def get_json_by_id(id):
     return result[int(id)]
+
+if __name__ == "__main__":
+    uvicorn.run(app)
