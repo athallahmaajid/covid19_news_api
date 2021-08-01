@@ -19,26 +19,39 @@ def get_json():
         links.append((div.find("a")['href'])[7:-91])
     for title, desc, link in zip(titles, descriptions[::2], links[::2]):
         desc = desc.text.split("·")
-        result[counter] = {"title": title.text, "desc": desc[1].strip(), "link": link, "time": desc[0].strip()}
+        result[counter] = {"title": title.text, "desc": desc[1].strip(), "link": link, "time": desc[0].strip(), 'detail':f"/api/news/{counter}"}
         counter += 1
     return result
 
+def get_json_by_id(data):
+    response = requests.get(f"{data['link']}")
+    bs = BeautifulSoup(response.text, "html.parser")
+    images = bs.find_all("img")
+    for image in images:
+        print(image.get('src'))
+        if image.get('src') == None:
+            continue
+        elif ('.jpg' in image.get('src')) or ('.jpeg' in image.get('src')):
+            data["image"] = image.get('src')
+            break
+    return data
+
 @app.get("/")
 def index():
-    return {"message":"Check me on Github https://github.com/athallahmaajid", "api":"/api", "source":"Google"}
+    return {"message":"Check me on Github https://github.com/athallahmaajid", "api":"/api", 'docs': '/docs', "source":"Google"}
 
 @app.get("/api")
 def get_docs():
-    return {"message":"get the api docs at /docs", "news":"/api/news"}
+    return {"news":"/api/news"}
 
 @app.get("/api/news")
 def get_api():
     return get_json()
 
 @app.get('/api/news/{id}')
-def get_json_by_id(id):
-    result = get_json()
-    return result[int(id)]
+def get_api_by_id(id):
+    all_data = get_json()
+    return get_json_by_id(all_data[int(id)])
 
 if __name__ == "__main__":
     uvicorn.run(app)
