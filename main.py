@@ -19,18 +19,20 @@ def get_json():
     for title, desc, link in zip(titles, descriptions[::2], links[::2]):
         desc = desc.text.split("·")
         result[counter] = {"title": title.text, "desc": desc[1].strip(), "link": link, "time": desc[0].strip(), 'detail':f"/api/news/{counter}"}
-
-        response = requests.get(f"{link}")
-        bs = BeautifulSoup(response.text, "html.parser")
-        images = bs.find_all("img")
-        for image in images:
-            if image.get('src') == None:
-                continue
-            elif ('.jpg' in image.get('src')) or ('.jpeg' in image.get('src')):
-                result[counter]["image"] = image.get('src')
-                break
         counter += 1
     return result
+
+def get_json_by_id(data):
+    response = requests.get(f"{data['link']}")
+    bs = BeautifulSoup(response.text, "html.parser")
+    images = bs.find_all("img")
+    for image in images:
+        if image.get('src') == None:
+            continue
+        elif ('.jpg' in image.get('src')) or ('.jpeg' in image.get('src')):
+            data["image"] = image.get('src')
+            break
+    return data
 
 @app.get("/")
 def index():
@@ -47,9 +49,7 @@ def get_api():
 @app.get('/api/news/{id}')
 def get_api_by_id(id):
     all_data = get_json()
-    id = int(id)
-    all_data[id].pop('detail')
-    return all_data[id]
+    return get_json_by_id(all_data[int(id)])
 
 if __name__ == "__main__":
     uvicorn.run(app)
